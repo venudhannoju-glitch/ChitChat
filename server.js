@@ -8,6 +8,35 @@ const io = new Server(server);
 
 app.use(express.static('public'));
 
+// Catch-all route to serve index.html for any remaining requests (SPA routing fallback)
+app.get('*', (req, res) => {
+    res.sendFile(__dirname + '/public/index.html');
+});
+
+const roomTimers = new Map();
+
+function startRoomTimer(code) {
+    if (roomTimers.has(code)) {
+        clearTimeout(roomTimers.get(code));
+    }
+    const timer = setTimeout(() => {
+        const room = io.sockets.adapter.rooms.get(code);
+        if (room && room.size <= 1) {
+            io.to(code).emit('roomExpired');
+            io.in(code).socketsLeave(code);
+        }
+        roomTimers.delete(code);
+    }, 60000); // 1 minute expiration
+    roomTimers.set(code, timer);
+}
+
+function clearRoomTimer(code) {
+    if (roomTimers.has(code)) {
+        clearTimeout(roomTimers.get(code));
+        roomTimers.delete(code);
+    }
+}
+
 io.on('connection', (socket) => {
     console.log('A user connected:', socket.id);
 
@@ -16,6 +45,7 @@ io.on('connection', (socket) => {
         let code = Math.floor(1000 + Math.random() * 9000).toString();
         socket.join(code);
         socket.emit('roomCreated', code);
+        startRoomTimer(code);
     });
 
     socket.on('joinRoom', (code) => {
@@ -27,6 +57,7 @@ io.on('connection', (socket) => {
 
         if (room.size === 1) {
             socket.join(code);
+            clearRoomTimer(code);
             socket.emit('roomJoined', code);
             socket.to(code).emit('userJoined');
         } else if (room.size >= 2) {
@@ -51,6 +82,7 @@ io.on('connection', (socket) => {
         socket.to(room).emit('userLeft');
         // Let the remaining user know they are waiting again
         socket.to(room).emit('waitingForPartner');
+        startRoomTimer(room);
     });
 
     socket.on('disconnecting', () => {
@@ -58,6 +90,7 @@ io.on('connection', (socket) => {
             if (room !== socket.id) {
                 socket.to(room).emit('userLeft');
                 socket.to(room).emit('waitingForPartner');
+                startRoomTimer(room);
             }
         });
     });

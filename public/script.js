@@ -19,6 +19,7 @@ const typingIndicator = document.getElementById('typing-indicator');
 
 let currentRoom = null;
 let typingTimeout = null;
+let isPartnerConnected = false;
 
 // Event Listeners for UI
 createBtn.addEventListener('click', () => {
@@ -114,6 +115,7 @@ socket.on('roomCreated', (code) => {
 
 socket.on('roomJoined', (code) => {
     currentRoom = code;
+    isPartnerConnected = true;
     showChatView(code);
     enableChat();
     updateStatus('Connected', 'connected');
@@ -121,6 +123,7 @@ socket.on('roomJoined', (code) => {
 });
 
 socket.on('userJoined', () => {
+    isPartnerConnected = true;
     enableChat();
     updateStatus('Connected', 'connected');
     addSystemMessage('Your partner has joined the chat.');
@@ -140,15 +143,25 @@ socket.on('stopTyping', () => {
 });
 
 socket.on('userLeft', () => {
-    disableChat();
-    updateStatus('Partner left', 'disconnected');
-    addSystemMessage('Your partner has left the chat.');
-    typingIndicator.classList.add('hidden');
+    if (isPartnerConnected) {
+        isPartnerConnected = false;
+        disableChat();
+        updateStatus('Partner left', 'disconnected');
+        addSystemMessage('Your partner has left the chat.');
+        typingIndicator.classList.add('hidden');
+    }
 });
 
 socket.on('waitingForPartner', () => {
-    updateStatus('Waiting for partner...', 'waiting');
-    addSystemMessage('You are now waiting for a new partner to join the room.');
+    if (!isPartnerConnected) {
+        updateStatus('Waiting for partner...', 'waiting');
+        addSystemMessage('Waiting for a new partner (Expires in 1m)');
+    }
+});
+
+socket.on('roomExpired', () => {
+    showError('Room expired after 1 minute of inactivity.');
+    resetToLanding();
 });
 
 socket.on('error', (msg) => {
@@ -158,6 +171,7 @@ socket.on('error', (msg) => {
 // Helper Functions
 function resetToLanding() {
     currentRoom = null;
+    isPartnerConnected = false;
     chatMessages.innerHTML = '';
     landingView.classList.add('active');
     chatView.classList.remove('active');
