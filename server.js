@@ -14,7 +14,8 @@ const io = new Server(server, {
 app.use(express.static('public'));
 
 // Catch-all route to serve index.html for any remaining requests (SPA routing fallback)
-app.get('*', (req, res) => {
+// Express v5 requires a regex or named parameter, so we use /(.*)/ instead of *
+app.get(/(.*)/, (req, res) => {
     res.sendFile(__dirname + '/public/index.html');
 });
 
