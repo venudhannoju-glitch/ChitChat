@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChitChat</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="app">
+        <div id="landing-view" class="view active">
+            <div class="glass-card">
+                <h1>ChitChat</h1>
+                <p>Connect instantly with a 4-digit code.</p>
+                <div class="actions">
+                    <button id="create-btn" class="primary-btn">Create Room</button>
+                    <div class="divider"><span>OR</span></div>
+                    <div class="join-action">
+                        <input type="text" id="join-code" placeholder="Enter 4-digit code" maxlength="4">
+                        <button id="join-btn" class="secondary-btn">Join</button>
+                    </div>
+                    <p id="error-msg" class="error-msg"></p>
+                </div>
+            </div>
+        </div>
+        
+        <div id="chat-view" class="view">
+            <div class="chat-header glass-header">
+                <h2>Room: <span id="current-room-code"></span></h2>
+                <div class="status waiting" id="chat-status">Waiting for partner...</div>
+            </div>
+            
+            <div class="chat-messages" id="chat-messages">
+                <!-- Messages go here -->
+            </div>
+            
+            <div class="chat-input-area glass-footer">
+                <form id="chat-form">
+                    <input type="text" id="chat-input" placeholder="Type a message..." autocomplete="off" disabled>
+                    <button type="submit" id="send-btn" disabled>Send</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
