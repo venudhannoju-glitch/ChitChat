@@ -20,14 +20,17 @@ io.on('connection', (socket) => {
 
     socket.on('joinRoom', (code) => {
         const room = io.sockets.adapter.rooms.get(code);
-        if (room && room.size === 1) {
+
+        if (!room) {
+            return socket.emit('error', 'Room does not exist. Create a new one!');
+        }
+
+        if (room.size === 1) {
             socket.join(code);
             socket.emit('roomJoined', code);
             socket.to(code).emit('userJoined');
-        } else if (room && room.size >= 2) {
-            socket.emit('error', 'Room is full');
-        } else {
-            socket.emit('error', 'Room does not exist');
+        } else if (room.size >= 2) {
+            socket.emit('error', 'Room is currently full.');
         }
     });
 
@@ -46,12 +49,15 @@ io.on('connection', (socket) => {
     socket.on('leaveRoom', (room) => {
         socket.leave(room);
         socket.to(room).emit('userLeft');
+        // Let the remaining user know they are waiting again
+        socket.to(room).emit('waitingForPartner');
     });
 
     socket.on('disconnecting', () => {
         socket.rooms.forEach(room => {
             if (room !== socket.id) {
                 socket.to(room).emit('userLeft');
+                socket.to(room).emit('waitingForPartner');
             }
         });
     });
