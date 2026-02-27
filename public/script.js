@@ -4,8 +4,8 @@ const socket = io();
 const landingView = document.getElementById('landing-view');
 const chatView = document.getElementById('chat-view');
 const createBtn = document.getElementById('create-btn');
-const joinCodeInput = document.getElementById('join-code');
-const joinBtn = document.getElementById('join-btn');
+const joinForm = document.getElementById('join-form');
+const codeBoxes = document.querySelectorAll('.code-box');
 const errorMsg = document.getElementById('error-msg');
 const currentRoomCodeSpan = document.getElementById('current-room-code');
 const chatStatus = document.getElementById('chat-status');
@@ -21,8 +21,41 @@ createBtn.addEventListener('click', () => {
     socket.emit('createRoom');
 });
 
-joinBtn.addEventListener('click', () => {
-    const code = joinCodeInput.value.trim();
+codeBoxes.forEach((box, index) => {
+    box.addEventListener('input', (e) => {
+        box.value = box.value.replace(/[^0-9]/g, '');
+        if (box.value && index < codeBoxes.length - 1) {
+            codeBoxes[index + 1].focus();
+        }
+    });
+
+    box.addEventListener('keydown', (e) => {
+        if (e.key === 'Backspace' && !box.value && index > 0) {
+            codeBoxes[index - 1].focus();
+        }
+    });
+
+    box.addEventListener('paste', (e) => {
+        e.preventDefault();
+        const pastedData = e.clipboardData.getData('text').replace(/[^0-9]/g, '').slice(0, 4);
+        if (pastedData) {
+            for (let i = 0; i < pastedData.length; i++) {
+                if (codeBoxes[index + i]) {
+                    codeBoxes[index + i].value = pastedData[i];
+                    if (index + i < codeBoxes.length - 1) {
+                        codeBoxes[index + i + 1].focus();
+                    } else {
+                        codeBoxes[index + i].focus();
+                    }
+                }
+            }
+        }
+    });
+});
+
+joinForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const code = Array.from(codeBoxes).map(box => box.value).join('');
     if (code.length === 4) {
         socket.emit('joinRoom', code);
     } else {

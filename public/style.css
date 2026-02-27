@@ -108,7 +108,8 @@ button {
     font-size: 0.85rem;
 }
 
-.divider::before, .divider::after {
+.divider::before,
+.divider::after {
     content: '';
     position: absolute;
     top: 50%;
@@ -117,15 +118,48 @@ button {
     background: rgba(255, 255, 255, 0.1);
 }
 
-.divider::before { left: 0; }
-.divider::after { right: 0; }
-
-.join-action {
-    display: flex;
-    gap: 0.5rem;
+.divider::before {
+    left: 0;
 }
 
-input {
+.divider::after {
+    right: 0;
+}
+
+.join-action-new {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.code-inputs {
+    display: flex;
+    gap: 0.8rem;
+    justify-content: center;
+}
+
+.code-box {
+    width: 3.5rem;
+    height: 4rem;
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+    text-align: center;
+    font-size: 1.5rem;
+    font-weight: 600;
+    border-radius: 12px;
+    outline: none;
+    transition: all 0.3s ease;
+}
+
+.code-box:focus {
+    border-color: #38bdf8;
+    box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2);
+    transform: translateY(-2px);
+}
+
+/* Maintain styles for chat input */
+input[type="text"]:not(.code-box) {
     background: rgba(15, 23, 42, 0.6);
     border: 1px solid rgba(255, 255, 255, 0.1);
     color: white;
@@ -136,15 +170,8 @@ input {
     transition: border-color 0.3s ease;
 }
 
-input:focus {
+input[type="text"]:not(.code-box):focus {
     border-color: #38bdf8;
-}
-
-#join-code {
-    flex: 1;
-    text-align: center;
-    letter-spacing: 4px;
-    font-size: 1.2rem;
 }
 
 .secondary-btn {
@@ -199,6 +226,7 @@ input:focus {
 .status.connected {
     color: #34d399;
 }
+
 .status.disconnected {
     color: #ef4444;
 }
@@ -226,8 +254,9 @@ input:focus {
 .chat-messages::-webkit-scrollbar {
     width: 6px;
 }
+
 .chat-messages::-webkit-scrollbar-thumb {
-    background: rgba(255,255,255,0.1);
+    background: rgba(255, 255, 255, 0.1);
     border-radius: 3px;
 }
 
@@ -242,8 +271,15 @@ input:focus {
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .system-msg {
