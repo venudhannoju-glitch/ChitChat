@@ -13,8 +13,12 @@ const chatMessages = document.getElementById('chat-messages');
 const chatForm = document.getElementById('chat-form');
 const chatInput = document.getElementById('chat-input');
 const sendBtn = document.getElementById('send-btn');
+const copyBtn = document.getElementById('copy-btn');
+const leaveBtn = document.getElementById('leave-btn');
+const typingIndicator = document.getElementById('typing-indicator');
 
 let currentRoom = null;
+let typingTimeout = null;
 
 // Event Listeners for UI
 createBtn.addEventListener('click', () => {
@@ -63,12 +67,39 @@ joinForm.addEventListener('submit', (e) => {
     }
 });
 
+copyBtn.addEventListener('click', () => {
+    if (currentRoom) {
+        navigator.clipboard.writeText(currentRoom);
+        const originalTitle = copyBtn.title;
+        copyBtn.title = 'Copied!';
+        setTimeout(() => copyBtn.title = originalTitle, 2000);
+    }
+});
+
+leaveBtn.addEventListener('click', () => {
+    if (currentRoom) {
+        socket.emit('leaveRoom', currentRoom);
+        resetToLanding();
+    }
+});
+
+chatInput.addEventListener('input', () => {
+    if (!currentRoom) return;
+    socket.emit('typing', currentRoom);
+    clearTimeout(typingTimeout);
+    typingTimeout = setTimeout(() => {
+        socket.emit('stopTyping', currentRoom);
+    }, 1000);
+});
+
 chatForm.addEventListener('submit', (e) => {
     e.preventDefault();
     const message = chatInput.value.trim();
     if (message && currentRoom) {
-        appendMessage(message, 'sent');
+        const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        appendMessage(message, 'sent', time);
         socket.emit('chatMessage', { room: currentRoom, message });
+        socket.emit('stopTyping', currentRoom);
         chatInput.value = '';
     }
 });
@@ -96,13 +127,23 @@ socket.on('userJoined', () => {
 });
 
 socket.on('chatMessage', (message) => {
-    appendMessage(message, 'received');
+    const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    appendMessage(message, 'received', time);
+});
+
+socket.on('typing', () => {
+    typingIndicator.classList.remove('hidden');
+});
+
+socket.on('stopTyping', () => {
+    typingIndicator.classList.add('hidden');
 });
 
 socket.on('userLeft', () => {
     disableChat();
     updateStatus('Partner left', 'disconnected');
     addSystemMessage('Your partner has left the chat.');
+    typingIndicator.classList.add('hidden');
 });
 
 socket.on('error', (msg) => {
@@ -110,6 +151,15 @@ socket.on('error', (msg) => {
 });
 
 // Helper Functions
+function resetToLanding() {
+    currentRoom = null;
+    chatMessages.innerHTML = '';
+    landingView.classList.add('active');
+    chatView.classList.remove('active');
+    codeBoxes.forEach(box => box.value = '');
+    codeBoxes[0].focus();
+    typingIndicator.classList.add('hidden');
+}
 function showChatView(code) {
     landingView.classList.remove('active');
     chatView.classList.add('active');
@@ -137,10 +187,18 @@ function disableChat() {
     sendBtn.disabled = true;
 }
 
-function appendMessage(text, type) {
+function appendMessage(text, type, time = '') {
     const el = document.createElement('div');
     el.classList.add('message', type);
     el.textContent = text;
+
+    if (time) {
+        const timeEl = document.createElement('span');
+        timeEl.classList.add('timestamp');
+        timeEl.textContent = time;
+        el.appendChild(timeEl);
+    }
+
     chatMessages.appendChild(el);
     scrollToBottom();
 }
