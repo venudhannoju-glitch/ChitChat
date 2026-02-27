@@ -1,4 +1,5 @@
-const socket = io();
+// const socket = io();
+const socket = io('https://chitchat-msen.onrender.com');
 
 // UI Elements
 const landingView = document.getElementById('landing-view');
