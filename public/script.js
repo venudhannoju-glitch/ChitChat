@@ -146,6 +146,11 @@ socket.on('userLeft', () => {
     typingIndicator.classList.add('hidden');
 });
 
+socket.on('waitingForPartner', () => {
+    updateStatus('Waiting for partner...', 'waiting');
+    addSystemMessage('You are now waiting for a new partner to join the room.');
+});
+
 socket.on('error', (msg) => {
     showError(msg);
 });

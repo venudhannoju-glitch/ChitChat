@@ -409,8 +409,91 @@ input[type="text"]:not(.code-box):focus {
     opacity: 0;
 }
 
+/* Responsive Media Queries */
+
+/* Tablet & Smaller Laptops (min-width: 481px up to 768px) */
 @media (min-width: 481px) {
     #app {
         height: 90vh;
+        max-width: 600px;
+        border-radius: 28px;
+    }
+
+    .glass-card {
+        padding: 4rem 3rem;
+    }
+
+    .code-box {
+        width: 4rem;
+        height: 4.5rem;
+        font-size: 1.8rem;
+    }
+}
+
+/* Laptops & Desktops (min-width: 769px up to 1024px) */
+@media (min-width: 769px) {
+    #app {
+        max-width: 800px;
+        height: 85vh;
+        max-height: 900px;
+        display: flex;
+    }
+
+    /* Change layout for landing view on wider screens */
+    #landing-view {
+        padding: 0;
+        background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" opacity="0.03"><circle cx="50" cy="50" r="40" fill="white"/></svg>');
+    }
+
+    .glass-card {
+        width: 80%;
+        max-width: 500px;
+        padding: 4rem;
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
+    }
+
+    .glass-card h1 {
+        font-size: 3rem;
+    }
+
+    .glass-card p {
+        font-size: 1.1rem;
+    }
+
+    .code-box {
+        width: 4.5rem;
+        height: 5rem;
+        font-size: 2rem;
+    }
+
+    .message {
+        font-size: 1.05rem;
+        max-width: 70%;
+    }
+}
+
+/* Large PCs & Ultrawide (min-width: 1025px) */
+@media (min-width: 1025px) {
+    #app {
+        max-width: 1000px;
+        border-radius: 36px;
+    }
+
+    .glass-card {
+        padding: 5rem;
+    }
+
+    .glass-card h1 {
+        font-size: 3.5rem;
+    }
+
+    .message {
+        font-size: 1.1rem;
+        max-width: 60%;
+    }
+
+    .chat-messages {
+        padding: 2.5rem;
     }
 }
